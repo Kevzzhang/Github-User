@@ -77,6 +77,8 @@ class MainActivity : AppCompatActivity() {
         viewmodel.errorResp.observe(this, Observer { error ->
             if (error != null) {
                 rvScrollListener.setLoaded()
+                searchAdapter?.removeLoadingView()
+
                 handleShowErrorLayout()
                 if (error is Int) {
                     setErrorLayoutMessage(getString(error))

@@ -20,8 +20,11 @@ class SearchViewmodel : ViewModel() {
     var errorResp: MutableLiveData<Any?>
     var showProgressBar: MutableLiveData<Boolean?>
 
+    private val userList: MutableList<User> = arrayListOf()
+
     private var pages = 1
     private var isHasMore = true
+    private var isRefresh = false
 
     init {
         successResp = MutableLiveData()
@@ -33,28 +36,20 @@ class SearchViewmodel : ViewModel() {
         this.mRepo = repo
     }
 
-    fun setPages(page: Int) {
-        this.pages = page
+    fun setRefresh(isRefresh: Boolean) {
+        this.isRefresh = isRefresh
     }
 
-    fun getPages(): Int {
-        return pages
-    }
-
-    fun setHasMore(hasMore: Boolean) {
-        isHasMore = hasMore
-    }
-
-    fun getHasMore(): Boolean {
-        return isHasMore
+    fun getRefresh(): Boolean {
+        return isRefresh
     }
 
     fun resetPages() {
         pages = 1
     }
 
-    fun handleProgressBar() {
-        showProgressBar.value = getPages() == 1
+    private fun handleProgressBar() {
+        showProgressBar.value = pages == 1
     }
 
     fun fetchRepoList(searchText: String) {
@@ -78,20 +73,19 @@ class SearchViewmodel : ViewModel() {
     }
 
     fun shouldShowErrorLayout(): Boolean {
-        return getPages() == 1
+        return pages == 1
     }
 
     fun handleSuccessFetchUserList(resp: LiveDataResult<Any?>) {
         if (resp.data != null) {
+            isRefresh = false
+
             try {
                 val data = resp.data as GithubSearch
+                isHasMore = data.items.isNotEmpty()
+                pages++
 
-                if (data.items.size > 0) {
-                    isHasMore = true
-                } else {
-                    isHasMore = false
-                }
-                setPages(getPages() + 1)
+                handleUserListLocal(data.items)
                 successResp.value = data.items
             } catch (e: Exception) {
                 errorResp.value = e.message
@@ -113,6 +107,37 @@ class SearchViewmodel : ViewModel() {
         } catch (e: Exception) {
             errorResp.value = e.message
         }
+    }
+
+    fun handleUserListLocal(item: List<User>?) {
+        if (!item.isNullOrEmpty()) {
+            if (isRefresh)
+                resetUpdateUserList(item)
+            else {
+                updateUserList(item)
+            }
+        }
+
+    }
+
+    fun reinitData() {
+        if (!userList.isNullOrEmpty()) {
+            successResp.value = userList
+        }
+    }
+
+    fun updateUserList(item: List<User>?) {
+        if (!item.isNullOrEmpty()) {
+            userList.addAll(item)
+        }
+    }
+
+    fun resetUpdateUserList(item: List<User>?) {
+        if (item != null && item.isNotEmpty()) {
+            userList.clear()
+            userList.addAll(userList)
+        }
+
     }
 
     override fun onCleared() {

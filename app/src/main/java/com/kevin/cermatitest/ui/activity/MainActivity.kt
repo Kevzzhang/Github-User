@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initUI() {
+        viewmodel.reinitData()
         setupRecyclerview()
     }
 
@@ -65,7 +66,7 @@ class MainActivity : AppCompatActivity() {
                 viewflipper.displayedChild = 0
                 rvScrollListener.setLoaded()
 
-                if (viewmodel.getPages() == 1) {
+                if (viewmodel.getRefresh()) {
                     searchAdapter?.addItems(items)
                 } else {
                     searchAdapter?.removeLoadingView()
@@ -124,6 +125,7 @@ class MainActivity : AppCompatActivity() {
             override fun onEditorAction(view: TextView?, actionId: Int, event: KeyEvent?): Boolean {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     viewmodel.resetPages()
+                    viewmodel.setRefresh(true)
                     handleFetchUserListData()
                 }
                 return false;

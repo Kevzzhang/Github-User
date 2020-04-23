@@ -67,6 +67,7 @@ class MainActivity : AppCompatActivity() {
                 rvScrollListener.setLoaded()
 
                 if (viewmodel.getRefresh()) {
+                    viewmodel.setRefresh(false)
                     searchAdapter?.addItems(items)
                 } else {
                     searchAdapter?.removeLoadingView()

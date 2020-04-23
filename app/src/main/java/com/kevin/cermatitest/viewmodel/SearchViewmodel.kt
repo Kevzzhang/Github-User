@@ -36,8 +36,8 @@ class SearchViewmodel : ViewModel() {
         this.mRepo = repo
     }
 
-    fun setRefresh(isRefresh: Boolean) {
-        this.isRefresh = isRefresh
+    fun setRefresh(refresh: Boolean) {
+        isRefresh = refresh
     }
 
     fun getRefresh(): Boolean {
@@ -78,14 +78,12 @@ class SearchViewmodel : ViewModel() {
 
     fun handleSuccessFetchUserList(resp: LiveDataResult<Any?>) {
         if (resp.data != null) {
-            isRefresh = false
-
             try {
                 val data = resp.data as GithubSearch
                 isHasMore = data.items.isNotEmpty()
                 pages++
 
-                handleUserListLocal(data.items)
+                updateUserListLocal(data.items)
                 successResp.value = data.items
             } catch (e: Exception) {
                 errorResp.value = e.message
@@ -109,7 +107,7 @@ class SearchViewmodel : ViewModel() {
         }
     }
 
-    fun handleUserListLocal(item: List<User>?) {
+    fun updateUserListLocal(item: List<User>?) {
         if (!item.isNullOrEmpty()) {
             if (isRefresh)
                 resetUpdateUserList(item)
